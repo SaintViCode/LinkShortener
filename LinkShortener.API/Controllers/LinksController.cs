@@ -76,5 +76,43 @@ namespace LinkShortener.API.Controllers
                 TotalClicks = link.Clicks?.Count ?? 0
             };
         }
+
+        [HttpGet("{id}/analytics")]
+        [Authorize]
+        public async Task<IActionResult> GetAnalytics(int id)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            var link = await _context.Links
+                .Include(l => l.Clicks)
+                .FirstOrDefaultAsync(l => l.Id == id && l.UserId == userId);
+
+            if (link == null)
+                return NotFound("Link not found.");
+
+            var analytics = new AnalyticsDto
+            {
+                TotalClicks = link.Clicks.Count,
+                ClicksByDate = link.Clicks
+                    .GroupBy(c => c.ClickedAt.Date)
+                    .Select(g => new ClicksByDateDto
+                    {
+                        Date = g.Key.ToString("yyyy-MM-dd"),
+                        Clicks = g.Count()
+                    })
+                    .OrderBy(x => x.Date)
+                    .ToList(),
+                ClicksByDevice = link.Clicks
+                    .GroupBy(c => c.DeviceType ?? "Unknown")
+                    .Select(g => new ClicksByDeviceDto
+                    {
+                        DeviceType = g.Key,
+                        Clicks = g.Count()
+                    })
+                    .ToList()
+            };
+
+            return Ok(analytics);
+        }
     }
 }
