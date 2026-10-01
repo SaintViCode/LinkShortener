@@ -1,14 +1,25 @@
 # 🔗 LinkShortener
 
-A full-stack URL shortening service with real-time analytics, built with ASP.NET Core and React.
+A full-stack URL shortening service with real-time analytics, built with ASP.NET Core 10 and React.
+
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-10.0-512BD4?style=flat&logo=dotnet)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)
+![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=flat&logo=microsoftsqlserver)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?style=flat&logo=tailwindcss)
 
 ## Features
 
-- Shorten any URL and get a shareable short link instantly
-- Optional user authentication — create an account to track your links
-- Click analytics per link: total clicks, breakdown by date and device type
-- JWT-based authentication with secure password hashing
-- Auto-redirect with background click tracking
+- 🔗 Shorten any URL instantly — no account required
+- 👤 Optional authentication to manage and track your links
+- 📊 Click analytics per link: total clicks, by date, by device and by country
+- 🌍 Country detection via IP geolocation
+- 📅 Link expiration — set an optional expiry date per link
+- 📱 QR code generation for every link
+- 🔒 JWT-based authentication with secure BCrypt password hashing
+
+## Screenshots
+
+> Dashboard, analytics, and QR code modal coming soon.
 
 ## Tech Stack
 
@@ -17,12 +28,17 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
 - Entity Framework Core 10
 - SQL Server
 - JWT Authentication
-- BCrypt password hashing
+- BCrypt.Net password hashing
 - Swashbuckle (Swagger UI)
+- ip-api.com for IP geolocation
 
-**Frontend** *(in progress)*
-- React
+**Frontend**
+- React 18
 - Tailwind CSS
+- React Router v6
+- Recharts (line, bar and pie charts)
+- qrcode.react
+- Axios
 
 ## Getting Started
 
@@ -30,7 +46,7 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - SQL Server (local or remote)
-- Node.js 18+ *(for the frontend)*
+- Node.js 18+
 
 ### Backend Setup
 
@@ -40,7 +56,7 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
    cd LinkShortener
    ```
 
-2. Update the connection string in `appsettings.json`:
+2. Update `appsettings.json` with your connection string:
    ```json
    "ConnectionStrings": {
      "DefaultConnection": "Server=localhost;Database=LinkShortener;Trusted_Connection=True;TrustServerCertificate=True;"
@@ -68,6 +84,30 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
    ```
 
 6. Open Swagger UI at `https://localhost:{port}/swagger`
+
+### Frontend Setup
+
+1. Navigate to the frontend folder:
+   ```bash
+   cd link-shortener-client
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Update the API base URL in `src/api/axios.js` if your port differs:
+   ```js
+   baseURL: 'https://localhost:7206/api'
+   ```
+
+4. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open `http://localhost:5173`
 
 ## API Endpoints
 
@@ -101,6 +141,10 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
   "clicksByDevice": [
     { "deviceType": "Desktop", "clicks": 30 },
     { "deviceType": "Mobile", "clicks": 12 }
+  ],
+  "clicksByCountry": [
+    { "country": "Costa Rica", "clicks": 25 },
+    { "country": "United States", "clicks": 17 }
   ]
 }
 ```
@@ -110,21 +154,27 @@ A full-stack URL shortening service with real-time analytics, built with ASP.NET
 ```
 LinkShortener/
 └── LinkShortener.API/
-    ├── Controllers/        # API controllers
-    ├── Data/               # DbContext
-    ├── DTOs/               # Data transfer objects
-    ├── Helpers/            # JWT helper
-    ├── Models/             # Entity models
-    └── Services/           # Business logic (in progress)
+│   ├── Controllers/        # Auth, Links and Redirect controllers
+│   ├── Data/               # AppDbContext
+│   ├── DTOs/               # Request and response models
+│   ├── Helpers/            # JWT token generator
+│   ├── Models/             # User, Link, Click entities
+│   └── Services/           # Business logic
+└── link-shortener-client/
+    ├── src/
+    │   ├── api/            # Axios instance
+    │   ├── context/        # Auth context
+    │   ├── pages/          # Home, Login, Register, Dashboard, Analytics
+    │   └── components/     # Shared components
 ```
 
 ## Roadmap
 
-- [ ] React frontend with dashboard
-- [ ] Link expiration support
-- [ ] Country-based analytics via IP geolocation
 - [ ] Custom short codes
-- [ ] QR code generation per link
+- [ ] Real-time click counter with SignalR
+- [ ] Link preview with Open Graph metadata
+- [ ] Bulk link import via CSV
+- [ ] Deploy to Azure
 
 ## License
 
