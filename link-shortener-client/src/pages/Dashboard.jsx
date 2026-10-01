@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function Dashboard() {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const [links, setLinks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [qrLink, setQrLink] = useState(null)
 
   useEffect(() => {
     api.get('/links').then(res => {
@@ -71,12 +73,39 @@ export default function Dashboard() {
                   >
                     Analytics
                   </Link>
+                  <button
+                  onClick={() => setQrLink(link.shortUrl)}
+                  className="text-sm bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg transition"
+                >
+                  QR
+                </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </main>
+      {qrLink && (
+  <div
+    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+    onClick={() => setQrLink(null)}
+  >
+    <div
+      className="bg-gray-900 rounded-2xl p-8 flex flex-col items-center gap-4"
+      onClick={e => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold">QR Code</h2>
+      <QRCodeSVG value={qrLink} size={200} bgColor="#111827" fgColor="#ffffff" />
+      <p className="text-gray-400 text-sm break-all max-w-xs text-center">{qrLink}</p>
+      <button
+        onClick={() => setQrLink(null)}
+        className="text-sm text-gray-400 hover:text-white transition"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
     </div>
   )
 }
