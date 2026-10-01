@@ -5,6 +5,13 @@
         public int TotalClicks { get; set; }
         public List<ClicksByDateDto> ClicksByDate { get; set; } = new();
         public List<ClicksByDeviceDto> ClicksByDevice { get; set; } = new();
+        public List<ClicksByCountryDto> ClicksByCountry { get; set; } = new();
+    }
+
+    public class ClicksByCountryDto
+    {
+        public string Country { get; set; } = string.Empty;
+        public int Clicks { get; set; }
     }
 
     public class ClicksByDateDto

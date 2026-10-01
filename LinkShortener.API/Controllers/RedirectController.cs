@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LinkShortener.API.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LinkShortener.API.Models;
+using System.Text.Json;
 
 namespace LinkShortener.API.Controllers
 {
@@ -26,18 +27,42 @@ namespace LinkShortener.API.Controllers
             if (link.ExpiresAt.HasValue && link.ExpiresAt < DateTime.UtcNow)
                 return BadRequest("Link has expired.");
 
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var country = await GetCountryFromIp(ip);
+
             var click = new Click
             {
                 LinkId = link.Id,
                 ClickedAt = DateTime.UtcNow,
                 DeviceType = GetDeviceType(Request.Headers["User-Agent"].ToString()),
-                Referrer = Request.Headers["Referer"].ToString()
+                Referrer = Request.Headers["Referer"].ToString(),
+                Country = country
             };
 
             _context.Clicks.Add(click);
             await _context.SaveChangesAsync();
 
             return Redirect(link.OriginalUrl);
+        }
+
+        private static async Task<string> GetCountryFromIp(string? ip)
+        {
+            if (string.IsNullOrEmpty(ip) || ip == "::1" || ip == "127.0.0.1")
+                return "Local";
+
+            try
+            {
+                using var http = new HttpClient();
+                var response = await http.GetFromJsonAsync<JsonElement>($"http://ip-api.com/json/{ip}");
+                if (response.GetProperty("status").GetString() == "success")
+                    return response.GetProperty("country").GetString() ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
+
+            return "Unknown";
         }
 
         private static string GetDeviceType(string userAgent)

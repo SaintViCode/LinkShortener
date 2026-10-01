@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Legend } from 'recharts'
 import api from '../api/axios'
 
 export default function Analytics() {
@@ -81,6 +81,34 @@ export default function Analytics() {
                 </ResponsiveContainer>
               )}
             </div>
+            <div className="bg-gray-900 rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-6">Clicks by country</h2>
+            {data.clicksByCountry.length === 0 ? (
+              <p className="text-gray-500 text-sm">No click data yet.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={data.clicksByCountry}
+                    dataKey="clicks"
+                    nameKey="country"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    label={({ country, percent }) => `${country} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {data.clicksByCountry.map((_, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '8px' }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
           </div>
         )}
       </main>

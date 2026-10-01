@@ -109,7 +109,16 @@ namespace LinkShortener.API.Controllers
                         DeviceType = g.Key,
                         Clicks = g.Count()
                     })
-                    .ToList()
+                    .ToList(),
+                ClicksByCountry = link.Clicks
+                .GroupBy(c => c.Country ?? "Unknown")
+                .Select(g => new ClicksByCountryDto
+                {
+                    Country = g.Key,
+                    Clicks = g.Count()
+                })
+                .OrderByDescending(x => x.Clicks)
+                .ToList()
             };
 
             return Ok(analytics);

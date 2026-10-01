@@ -9,6 +9,7 @@ export default function Home() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [expiresAt, setExpiresAt] = useState('')
 
   const handleShorten = async (e) => {
     e.preventDefault()
@@ -16,8 +17,10 @@ export default function Home() {
     setResult(null)
     setLoading(true)
     try {
-      const res = await api.post('/links', { originalUrl: url })
-      setResult(res.data)
+      const res = await api.post('/links', { 
+      originalUrl: url,
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null
+    })
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -59,6 +62,12 @@ export default function Home() {
             onChange={e => setUrl(e.target.value)}
             className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
           />
+          <input
+          type="datetime-local"
+          value={expiresAt}
+          onChange={e => setExpiresAt(e.target.value)}
+          className="w-full bg-gray-900 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 text-gray-400"
+        />
           <button
             type="submit"
             disabled={loading}
@@ -90,6 +99,11 @@ export default function Home() {
               </button>
             </div>
             <p className="text-gray-500 text-sm mt-3 break-all">Original: {result.originalUrl}</p>
+            {result.expiresAt && (
+            <p className="text-yellow-500 text-sm mt-1">
+              Expires: {new Date(result.expiresAt).toLocaleString()}
+            </p>
+          )}
           </div>
         )}
       </main>
